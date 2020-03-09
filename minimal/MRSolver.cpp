@@ -248,7 +248,7 @@ void MRSolver::clear(Minisat::Clause &clause, Minisat::vec<int> &S) {
     int sSize=S.size();
     int s;
 
-    while (sIndex<sSize&&clauseIndex<clauseSize){
+    while (sIndex<sSize&&clauseLastIndex<clauseSize){
         Minisat::Lit lis=(clause)[clauseLastIndex];
         (clause)[clauseIndex]=lis;
         s=S[sIndex];
