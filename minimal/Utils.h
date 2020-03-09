@@ -21,6 +21,7 @@ inline bool isSub(std::vector<int> &source,Minisat::Clause *clause,int limit){
         }
         if(atom==source[sourceIndex]){
             ++clauseIndex;
+            ++sourceIndex;
             continue;
         }
         if(atom>source[sourceIndex]){

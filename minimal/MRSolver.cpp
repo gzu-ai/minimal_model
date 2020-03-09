@@ -173,8 +173,6 @@ void MRSolver::copyToClauses(Minisat::vec<Minisat::CRef> &source,
 }
 
 bool MRSolver::compute(Minisat::vec<Minisat::CRef> &ts, Minisat::vec<int> &S) {
-    Minisat::Solver solver;
-    Minisat::vec<Minisat::Lit> lits;
     if (ts.size() == 0) {
         return S.size() != 0;
     }
@@ -189,6 +187,8 @@ bool MRSolver::compute(Minisat::vec<Minisat::CRef> &ts, Minisat::vec<int> &S) {
         }
         return false;
     }
+    Minisat::Solver solver;
+    Minisat::vec<Minisat::Lit> lits;
     for (int i = 0; i < this->solver.nVars(); i++) {
         solver.newVar();
     }
@@ -217,14 +217,15 @@ bool MRSolver::isIntersection(Minisat::vec<int> &S, Minisat::Clause &clause) {
     int clauseIndex=0;
     int sIndex=0;
     int sSize=S.size();
-    int s=S[sIndex];
-    Minisat::Lit lis=(clause)[clauseIndex];
-    int var= Minisat::var(lis);
+    int s;
+    Minisat::Lit lis;
+    int var;
     while (sIndex<sSize&&clauseIndex<clauseSize){
+        lis=(clause)[clauseIndex];
+        var= Minisat::var(lis);
+        s=S[sIndex];
         if (Minisat::sign(lis)){
             ++clauseIndex;
-            lis=(clause)[clauseIndex];
-            var= Minisat::var(lis);
             continue;
         }
         if (var==s){
@@ -232,11 +233,8 @@ bool MRSolver::isIntersection(Minisat::vec<int> &S, Minisat::Clause &clause) {
         }
         if(var>s){
             ++sIndex;
-            s=S[sIndex];
         } else{
             ++clauseIndex;
-            lis=(clause)[clauseIndex];
-            var= Minisat::var(lis);
         }
     }
     return false;
@@ -248,30 +246,24 @@ void MRSolver::clear(Minisat::Clause &clause, Minisat::vec<int> &S) {
     int clauseLastIndex=0;
     int sIndex=0;
     int sSize=S.size();
-    int s=S[sIndex];
+    int s;
 
     while (sIndex<sSize&&clauseIndex<clauseSize){
         Minisat::Lit lis=(clause)[clauseLastIndex];
+        (clause)[clauseIndex]=lis;
+        s=S[sIndex];
         int var= Minisat::var(lis);
         if (var==s) {
             // 删除
             ++clauseLastIndex;
-            if (clauseLastIndex < clauseSize) {
-                (clause)[clauseIndex]=(clause)[clauseLastIndex];
-            } else {
-                break;
-            }
+            ++sIndex;
         }
         if(var>s){
             ++sIndex;
-            s=S[sIndex];
         } else{
             ++clauseLastIndex;
             ++clauseIndex;
         }
-    }
-    for ( ; clauseLastIndex <clauseSize ; ++clauseLastIndex,++clauseIndex) {
-        (clause)[clauseIndex]=(clause)[clauseIndex];
     }
     for ( ;clauseIndex <clauseSize ; ++clauseIndex) {
         clause.pop();
@@ -292,7 +284,8 @@ void MRSolver::reduce(Minisat::vec<Minisat::CRef> &clauses, Minisat::vec<int> &S
             continue;
         }
         clear(clause,S);
-        if (clauses.size()==0){
+        if (clause.size()==0){
+            ca.free(crf);
             continue;
         }
         ++clauseIndex;
