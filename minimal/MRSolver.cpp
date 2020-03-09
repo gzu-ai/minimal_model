@@ -125,7 +125,7 @@ bool MRSolver::mr(Minisat::vec<Minisat::CRef> &clauses,Minisat::vec<Minisat::lbo
                 ++atomIndex;
             }
         }
-        if (del) {
+        if (del|| atomIndex==0) {
             ca.free(c);
             continue;
         }
@@ -175,14 +175,14 @@ void MRSolver::copyToClauses(Minisat::vec<Minisat::CRef> &source,
 bool MRSolver::compute(Minisat::vec<Minisat::CRef> &ts, Minisat::vec<int> &S) {
     Minisat::Solver solver;
     Minisat::vec<Minisat::Lit> lits;
-    if (ts.size()==0 ) {
-        return S.size()!=0;
+    if (ts.size() == 0) {
+        return S.size() != 0;
     }
-    if (S.size() == 1){
+    if (S.size() == 1) {
         for (int i = 0; i < ts.size(); ++i) {
-            Minisat::Clause * clause= ca.lea(ts[i]);
+            Minisat::Clause *clause = ca.lea(ts[i]);
             for (int j = 0; j < clause->size(); ++j) {
-                if(Minisat::sign((*clause)[j])){
+                if (Minisat::sign((*clause)[j])) {
                     return true;
                 }
             }
@@ -195,9 +195,10 @@ bool MRSolver::compute(Minisat::vec<Minisat::CRef> &ts, Minisat::vec<int> &S) {
 
     for (int i = 0; i < ts.size(); ++i) {
         lits.clear();
-        Minisat::Clause& clause= ca[ts[i]];
+        Minisat::Clause &clause = ca[ts[i]];
+        if (clause.size() == 0)continue;
         for (int j = 0; j < clause.size(); ++j) {
-            Minisat::Lit lit=clause[j];
+            Minisat::Lit lit = clause[j];
             lits.push(lit);
         }
         solver.addClause(lits);
@@ -290,8 +291,11 @@ void MRSolver::reduce(Minisat::vec<Minisat::CRef> &clauses, Minisat::vec<int> &S
             ca.free(crf);
             continue;
         }
-        ++clauseIndex;
         clear(clause,S);
+        if (clauses.size()==0){
+            continue;
+        }
+        ++clauseIndex;
     }
     for(;clauseIndex<clauseSize;++clauseIndex){
         clauses.pop();
