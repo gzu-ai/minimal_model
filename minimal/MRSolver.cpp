@@ -257,6 +257,7 @@ void MRSolver::clear(Minisat::Clause &clause, Minisat::vec<int> &S) {
             // 删除
             ++clauseLastIndex;
             ++sIndex;
+            continue;
         }
         if(var>s){
             ++sIndex;
@@ -264,6 +265,9 @@ void MRSolver::clear(Minisat::Clause &clause, Minisat::vec<int> &S) {
             ++clauseLastIndex;
             ++clauseIndex;
         }
+    }
+    for (; clauseLastIndex <clauseSize ; ++clauseIndex,++clauseLastIndex) {
+        (clause)[clauseIndex]= (clause)[clauseLastIndex];
     }
     for ( ;clauseIndex <clauseSize ; ++clauseIndex) {
         clause.pop();
