@@ -125,7 +125,7 @@ void StronglyConnectedGraph::compute(Graph *graph) {
             addPoint(from,to);
             ++itt;
         }
-        if (it.second.size()==0){
+        if (it.second.empty()){
             addPoint(from,from);
         }
     }
