@@ -84,6 +84,18 @@ Graph *Graph::reverse() {
     return graph;
 }
 
+void Graph::print() {
+    puts("graph");
+
+    for (auto item :content){
+        printf("%d  -> ",item.first);
+        for (auto it:item.second) {
+            printf(" %d",it);
+        }
+        putchar('\n');
+    }
+}
+
 
 bool StronglyConnectedGraph::remove(int point) {
     if (Graph::remove(point)){
@@ -164,4 +176,17 @@ void StronglyConnectedGraph::done() {
 
 int StronglyConnectedGraph::getEmptyInDegree() {
     return Graph::getEmptyInDegree();
+}
+
+void StronglyConnectedGraph::print() {
+    Graph::print();
+    puts("SCC");
+    for (auto it:weights){
+        printf("%d  : ",it.first);
+        for(auto item:it.second){
+            printf(" %d",item);
+        }
+        putchar('\n');
+    }
+    putchar('\n');
 }

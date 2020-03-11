@@ -14,6 +14,7 @@ public:
     void addPoint(int form ,int to);
     bool remove(int point);
     void done();
+    void print();
     int getEmptyInDegree (){
         if(emptyInDegree.size()>0){
             return  *emptyInDegree.begin();
@@ -44,6 +45,7 @@ public:
     void compute(Graph*graph);
     void done();
     int getEmptyInDegree ();
+    void print();
 private:
     std::unordered_map<int ,std::vector<int> > weights;
     void dfs(Graph * graph, int node,std::vector<int > *list,bool  * visited);
