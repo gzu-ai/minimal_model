@@ -63,14 +63,14 @@ int main(int argc, char** argv)
         }
         printf("SATISFIABLE\n");
         vec<lbool>& model = solver->getModel();
-
+        int index=0;
+        putchar('[');
         for (int i = 0; i < model.size(); ++i) {
             if(model[i]==l_True){
-                printf("%d ",i+1);
+                printf("%s%d",(index++==0?"":" "),i+1);
             }
         }
-        printf("\n");
-
+        puts("]");
     } catch (OutOfMemoryException&){
         printf("===============================================================================\n");
         printf("INDETERMINATE\n");
