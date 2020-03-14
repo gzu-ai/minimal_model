@@ -30,21 +30,20 @@ namespace Minimal {
 //=================================================================================================
 // DIMACS Parser:
 
-template<class B, class Solver>
-static void readClause(B& in, Solver& S, SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit>& lits) {
+template<class B>
+static void readClause(B& in, SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit>& lits) {
     int     parsed_lit, var;
     lits.clear();
     for (;;){
         parsed_lit = parseInt(in);
         if (parsed_lit == 0) break;
         var = abs(parsed_lit)-1;
-        while (var >= S.nVars()) S.newVar();
         lits.push( (parsed_lit > 0) ? SOlVER_NAMESPACE::mkLit(var) : ~SOlVER_NAMESPACE::mkLit(var) );
     }
 }
 
-template<class B, class Solver,class C>
-static void parse_DIMACS_main(B& in, Solver& S,C * cls, bool strictp = false) {
+template<class B,class C>
+static void parse_DIMACS_main(B& in,C * cls, bool strictp = false) {
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
     int vars    = 0;
     int clauses = 0;
@@ -66,9 +65,9 @@ static void parse_DIMACS_main(B& in, Solver& S,C * cls, bool strictp = false) {
             skipLine(in);
         else{
             cnt++;
-            readClause(in, S, lits);
+            readClause(in, lits);
             cls->addClause(lits);
-            S.addClause_(lits); }
+        }
     }
     if (strictp && cnt != clauses)
         printf("PARSE ERROR! DIMACS header mismatch: wrong number of clauses\n");
@@ -76,10 +75,10 @@ static void parse_DIMACS_main(B& in, Solver& S,C * cls, bool strictp = false) {
 
 // Inserts problem into solver.
 //
-template<class Solver,class C>
-static void parse_DIMACS(gzFile input_stream, Solver& S,C *cls, bool strictp = false) {
+template<class C>
+static void parse_DIMACS(gzFile input_stream, C *cls, bool strictp = false) {
         SOlVER_NAMESPACE::StreamBuffer in(input_stream);
-    parse_DIMACS_main(in, S,cls, strictp); }
+    parse_DIMACS_main(in,cls, strictp); }
 
 //=================================================================================================
 }

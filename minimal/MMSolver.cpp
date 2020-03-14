@@ -10,22 +10,31 @@ bool MMSolver::solve() {
         return result;
     }
     compute_model_count=1;
-    while (solver.solve()){
+    SOlVER_NAMESPACE::SimpSolver *solver= new  SOlVER_NAMESPACE::SimpSolver();
+    addClauseToSolver(solver);
+    solver->eliminate(true);
+    while (solver->solve()){
         result =true;
+        SOlVER_NAMESPACE::SimpSolver *temp= new  SOlVER_NAMESPACE::SimpSolver();
+        addClauseToSolver(temp);
         litsT.clear();
         model.clear();
-        for (int i = 0; i < solver.nVars(); i++) {
-            SOlVER_NAMESPACE::lbool value=solver.model[i];
+        for (int i = 0; i < solver->nVars(); i++) {
+            SOlVER_NAMESPACE::lbool value=solver->model[i];
             model.push(value);
             if (value == SOlVER_NAMESPACE::l_True) {
                 litsT.push(~SOlVER_NAMESPACE::mkLit(i));
             } else if(value==SOlVER_NAMESPACE::l_False){
-                solver.addClause(~SOlVER_NAMESPACE::mkLit(i));
+                temp->addClause(~SOlVER_NAMESPACE::mkLit(i));
             }
         }
-        solver.addClause(litsT);
+        temp->addClause(litsT);
+        delete solver;
+        solver=temp;
         ++compute_model_count;
+        solver->eliminate(true);
     }
+    delete solver;
     return result;
 }
 

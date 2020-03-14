@@ -5,30 +5,40 @@
 using namespace Minimal;
 
 bool MRSolver::solve() {
-    if (compute_model_count>1){
+    SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> litsT;
+    if(compute_model_count>0){
         return result;
     }
     compute_model_count=1;
-    SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> litsT;
-    while (solver.solve()){
+    SOlVER_NAMESPACE::SimpSolver *solver= new  SOlVER_NAMESPACE::SimpSolver();
+    addClauseToSolver(solver);
+    copyToClauses(this->clauses,this->_mr_clauses);
+    solver->eliminate(true);
+    while (solver->solve()){
         result =true;
+        SOlVER_NAMESPACE::SimpSolver *temp= new  SOlVER_NAMESPACE::SimpSolver();
+        addClauseToSolver(temp);
         litsT.clear();
         model.clear();
-        for (int i = 0; i < solver.nVars(); i++) {
-            SOlVER_NAMESPACE::lbool value =solver.model[i];
+        for (int i = 0; i < solver->nVars(); i++) {
+            SOlVER_NAMESPACE::lbool value=solver->model[i];
             model.push(value);
             if (value == SOlVER_NAMESPACE::l_True) {
                 litsT.push(~SOlVER_NAMESPACE::mkLit(i));
-            } else if (value == SOlVER_NAMESPACE::l_False) {
-                solver.addClause(~SOlVER_NAMESPACE::mkLit(i));
+            } else if(value==SOlVER_NAMESPACE::l_False){
+                temp->addClause(~SOlVER_NAMESPACE::mkLit(i));
             }
         }
-        if (this->check()){
+        temp->addClause(litsT);
+        delete solver;
+        solver=temp;
+        if(this->check()){
             break;
         }
         ++compute_model_count;
-        solver.addClause(litsT);
+        solver->eliminate(true);
     }
+    delete solver;
     return result;
 }
 
@@ -36,17 +46,17 @@ bool MRSolver::check() {
     ++check_model_count;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::lbool> model;
     int modeSize=0;
-    for (int j = 0; j < solver.nVars(); ++j) {
-        SOlVER_NAMESPACE::lbool& value = solver.model[j];
+    for (int j = 0; j < nVars(); ++j) {
+        SOlVER_NAMESPACE::lbool& value = this->model[j];
         model.push(value);
         if (value==SOlVER_NAMESPACE::l_True){
             ++modeSize;
         }
     }
-    int limit =solver.nVars();
-    mr(this->clauses,model);
+    int limit =nVars();
+    mr(this->_mr_clauses,model);
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> clauses;
-    copyToClauses(this->clauses,clauses);
+    copyToClauses(this->_mr_clauses,clauses);
     StronglyConnectedGraph graph;
     createGraph(clauses,graph);
     int node= 0;
@@ -129,7 +139,7 @@ bool MRSolver::mr(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses,SOlVER_
 
 bool MRSolver::createGraph(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef>& clauses,StronglyConnectedGraph &graph) {
     Graph gr;
-    int base= solver.nVars();
+    int base= nVars();
     for (int i = 0; i < clauses.size(); ++i) {
         int key=base+i;
         SOlVER_NAMESPACE::Clause * clause= ca.lea(clauses[i]);
@@ -178,9 +188,9 @@ bool MRSolver::compute(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts, SOlVER
         }
         return true;
     }
-    SOlVER_NAMESPACE::Solver solver;
+    SOlVER_NAMESPACE::SimpSolver solver;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
-    for (int i = 0; i < this->solver.nVars(); i++) {
+    for (int i = 0; i < nVars(); i++) {
         solver.newVar();
     }
 
@@ -200,6 +210,7 @@ bool MRSolver::compute(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts, SOlVER
     }
     solver.addClause(lits);
     ++compute_mini_model_count;
+    solver.eliminate(true);
     return !solver.solve();
 }
 
@@ -266,7 +277,7 @@ void MRSolver::reduce(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses, SO
 
 void MRSolver::computeTS(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses, SOlVER_NAMESPACE::vec<int> &source, SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts) {
     ts.clear();
-    int  limit=solver.nVars();
+    int  limit=nVars();
     for (int i = 0; i < clauses.size(); ++i) {
         SOlVER_NAMESPACE::CRef  crf=clauses[i];
         if(isSub(source,ca[crf],limit)){

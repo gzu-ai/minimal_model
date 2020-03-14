@@ -17,6 +17,7 @@
 #include "minisat/mtl/Sort.h"
 #include "minisat/mtl/Vec.h"
 #include "minisat/utils/System.h"
+#include "minisat/simp/SimpSolver.h"
 #endif
 
 #define SOlVER_NAMESPACE Minisat
