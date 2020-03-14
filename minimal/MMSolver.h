@@ -9,11 +9,11 @@ class MMSolver : public BaseSolver{
 
 public:
     bool solve();
-    MMSolver(const char *path, bool strictp,int verbosity):BaseSolver(path,strictp,verbosity){}
     void printStats();
     Minisat::vec<Minisat::lbool>&  getModel(){
         return model;
     }
+    void addClause(Minisat::vec<Minisat::Lit>&lits){}
 private:
     int compute_model_count=0;
     bool result = false;

@@ -51,10 +51,11 @@ int main(int argc, char** argv)
         signal(SIGQUIT,SIGINT_exit);
         double initial_time = cpuTime();
         if (strcmp(&*mod,"MMSAT")==0){
-            solver=new MMSolver(argv[1],strictp,verb);
+            solver=new MMSolver();
         } else{
-            solver=new MRSolver(argv[1],strictp,verb);
+            solver=new MRSolver();
         }
+        solver->readCNF(argv[1],strictp,verb);
         bool  result=solver->solve();
         solver->printStats();
         if (!result){

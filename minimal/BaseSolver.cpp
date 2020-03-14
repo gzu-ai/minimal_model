@@ -5,7 +5,7 @@
 #include <minisat/core/Dimacs.h>
 #include "BaseSolver.h"
 #include "minisat/utils/System.h"
-BaseSolver::BaseSolver(const char *path, bool strictp, int verbosity) {
+void BaseSolver::readCNF(const char *path, bool strictp, int verbosity) {
     gzFile in = gzopen(path, "rb");
     solver.verbosity = verbosity;
     if (in == NULL)
@@ -15,8 +15,7 @@ BaseSolver::BaseSolver(const char *path, bool strictp, int verbosity) {
         printf("============================[ Problem Statistics ]=============================\n");
         printf("|                                                                             |\n");
     }
-
-    Minisat::parse_DIMACS(in, this->solver, (bool) strictp);
+    Minisat::parse_DIMACS(in, this->solver, this,(bool) strictp);
     gzclose(in);
 }
  void BaseSolver::_printStats()

@@ -10,7 +10,6 @@ bool MRSolver::solve() {
     }
     compute_model_count=1;
     Minisat::vec<Minisat::Lit> litsT;
-    copyToClauses(this->clauses);
     while (solver.solve()){
         result =true;
         litsT.clear();
@@ -44,13 +43,13 @@ bool MRSolver::check() {
             ++modeSize;
         }
     }
+    int limit =solver.nVars();
     mr(this->clauses,model);
     Minisat::vec<Minisat::CRef> clauses;
     copyToClauses(this->clauses,clauses);
     StronglyConnectedGraph graph;
     createGraph(clauses,graph);
     int node= 0;
-    int limit =solver.nVars();
     Minisat::vec<int> S;
     Minisat::vec<Minisat::CRef > ts;
     node = graph.getEmptyInDegree();
@@ -60,18 +59,17 @@ bool MRSolver::check() {
             node = graph.getEmptyInDegree();
             continue;
         }
-        computeS(graph,S);
-        computeTS(clauses,graph.getComponent(node),ts);
-        if (compute(ts,S)){
+        computeS(graph.getComponent(node),S);
+        computeTS(clauses,S,ts);
+        if (!compute(ts,S)){
             break;
         }
         //M=M -S
         for (int i = 0; i < S.size(); ++i) {
-            int key=S[i];
-            if (model[key]==Minisat::l_True){
-                --modeSize;
-                model[key]=Minisat::l_False;
-            }
+            int key = S[i];
+            --modeSize;
+            model[key] = Minisat::l_False;
+
         }
         reduce(clauses,S);
         graph.remove(node);
@@ -84,21 +82,6 @@ bool MRSolver::check() {
     return modeSize==0;
 }
 
-void MRSolver::copyToClauses(Minisat::vec<Minisat::CRef> &clauses) {
-    auto it = solver.clausesBegin();
-    Minisat::vec<Minisat::Lit> list;
-    while (it!=solver.clausesEnd()){
-        list.clear();
-        for (int i = 0; i < (*it).size(); ++i) {
-            list.push((*it)[i]);
-        }
-        Minisat::sort(list);
-        Minisat::CRef crf=ca.alloc(list);
-        clauses.push(crf);
-        ++it;
-    }
-
-}
 
 bool MRSolver::mr(Minisat::vec<Minisat::CRef> &clauses,Minisat::vec<Minisat::lbool> &model) {
     int clauseSize=clauses.size();
@@ -107,30 +90,33 @@ bool MRSolver::mr(Minisat::vec<Minisat::CRef> &clauses,Minisat::vec<Minisat::lbo
     for (; clauseLastIndex < clauseSize; ++clauseLastIndex) {
         Minisat::CRef c = clauses[clauseLastIndex];
         clauses[clauseIndex] = c;
-        Minisat::Clause *clause = ca.lea(c);
+        Minisat::Clause &clause = ca[c];
         int atomLastIndex = 0;
         int atomIndex = 0;
-        int atomSize = clause->size();
+        int atomSize = clause.size();
         bool del = false;
         for (; atomLastIndex < atomSize; ++atomLastIndex) {
-            auto d = (*clause)[atomLastIndex];
-            (*clause)[atomIndex] = d;
+            auto d = (clause)[atomLastIndex];
+            (clause)[atomIndex] = d;
             bool sign = Minisat::sign(d);
             int value = Minisat::var(d);
+
             if (sign && model[value] == Minisat::l_False) {
+
                 del = true;
                 break;
             }
             if (model[value] == Minisat::l_True) {
                 ++atomIndex;
             }
+
         }
         if (del|| atomIndex==0) {
             ca.free(c);
             continue;
         }
         for (; atomIndex < atomSize; ++atomIndex) {
-            clause->pop();
+            clause.pop();
         }
         ++clauseIndex;
 
@@ -165,27 +151,32 @@ bool MRSolver::createGraph(Minisat::vec<Minisat::CRef>& clauses,StronglyConnecte
 
 void MRSolver::copyToClauses(Minisat::vec<Minisat::CRef> &source,
         Minisat::vec<Minisat::CRef> &dist) {
+    Minisat::vec<Minisat::Lit> list;
     for (int i = 0; i < source.size(); ++i) {
          Minisat::Clause &clause= ca[source[i]];
-         Minisat::CRef  c = ca.alloc(clause);
+         list.clear();
+        for (int j = 0; j < clause.size(); ++j) {
+            list.push(clause[j]);
+        }
+         Minisat::CRef  c = ca.alloc(list);
          dist.push(c);
     }
 }
 
 bool MRSolver::compute(Minisat::vec<Minisat::CRef> &ts, Minisat::vec<int> &S) {
     if (ts.size() == 0) {
-        return S.size() != 0;
+        return S.size() == 0;
     }
     if (S.size() == 1) {
         for (int i = 0; i < ts.size(); ++i) {
             Minisat::Clause *clause = ca.lea(ts[i]);
             for (int j = 0; j < clause->size(); ++j) {
                 if (Minisat::sign((*clause)[j])) {
-                    return true;
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
     Minisat::Solver solver;
     Minisat::vec<Minisat::Lit> lits;
@@ -209,36 +200,9 @@ bool MRSolver::compute(Minisat::vec<Minisat::CRef> &ts, Minisat::vec<int> &S) {
     }
     solver.addClause(lits);
     ++compute_mini_model_count;
-    return solver.solve();
+    return !solver.solve();
 }
 
-bool MRSolver::isIntersection(Minisat::vec<int> &S, Minisat::Clause &clause) {
-    int clauseSize=clause.size();
-    int clauseIndex=0;
-    int sIndex=0;
-    int sSize=S.size();
-    int s;
-    Minisat::Lit lis;
-    int var;
-    while (sIndex<sSize&&clauseIndex<clauseSize){
-        lis=(clause)[clauseIndex];
-        var= Minisat::var(lis);
-        s=S[sIndex];
-        if (Minisat::sign(lis)){
-            ++clauseIndex;
-            continue;
-        }
-        if (var==s){
-            return true;
-        }
-        if(var>s){
-            ++sIndex;
-        } else{
-            ++clauseIndex;
-        }
-    }
-    return false;
-}
 
 void MRSolver::clear(Minisat::Clause &clause, Minisat::vec<int> &S) {
     int clauseSize=clause.size();
@@ -249,10 +213,10 @@ void MRSolver::clear(Minisat::Clause &clause, Minisat::vec<int> &S) {
     int s;
 
     while (sIndex<sSize&&clauseLastIndex<clauseSize){
-        Minisat::Lit lis=(clause)[clauseLastIndex];
-        (clause)[clauseIndex]=lis;
+        Minisat::Lit lit=clause[clauseLastIndex];
+        clause[clauseIndex]=lit;
         s=S[sIndex];
-        int var= Minisat::var(lis);
+        int var= Minisat::var(lit);
         if (var==s) {
             // 删除
             ++clauseLastIndex;
@@ -300,13 +264,13 @@ void MRSolver::reduce(Minisat::vec<Minisat::CRef> &clauses, Minisat::vec<int> &S
 
 }
 
-void
-MRSolver::computeTS(Minisat::vec<Minisat::CRef> &clauses, std::vector<int> &source, Minisat::vec<Minisat::CRef> &ts) {
+void MRSolver::computeTS(Minisat::vec<Minisat::CRef> &clauses, Minisat::vec<int> &source, Minisat::vec<Minisat::CRef> &ts) {
     ts.clear();
+    int  limit=solver.nVars();
     for (int i = 0; i < clauses.size(); ++i) {
-        Minisat::Clause* clause= ca.lea(clauses[i]);
-        if (isSub(source,clause,solver.nVars())){
-            ts.push(clauses[i]);
+        Minisat::CRef  crf=clauses[i];
+        if(isSub(source,ca[crf],limit)){
+            ts.push(crf);
         }
     }
 }
@@ -317,3 +281,8 @@ void MRSolver::printStats() {
     printf("CheckModelCount       : %d \n", check_model_count);
     printf("ComputeMIniModelCount : %d \n", compute_mini_model_count);
 }
+
+int MRSolver::copyModel(Minisat::vec<Minisat::lbool> &mode) {
+    return 0;
+}
+

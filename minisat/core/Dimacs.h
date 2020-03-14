@@ -44,8 +44,8 @@ static void readClause(B& in, Solver& S, vec<Lit>& lits) {
     }
 }
 
-template<class B, class Solver>
-static void parse_DIMACS_main(B& in, Solver& S, bool strictp = false) {
+template<class B, class Solver,class C>
+static void parse_DIMACS_main(B& in, Solver& S,C * cls, bool strictp = false) {
     vec<Lit> lits;
     int vars    = 0;
     int clauses = 0;
@@ -68,6 +68,7 @@ static void parse_DIMACS_main(B& in, Solver& S, bool strictp = false) {
         else{
             cnt++;
             readClause(in, S, lits);
+            cls->addClause(lits);
             S.addClause_(lits); }
     }
     if (strictp && cnt != clauses)
@@ -76,10 +77,10 @@ static void parse_DIMACS_main(B& in, Solver& S, bool strictp = false) {
 
 // Inserts problem into solver.
 //
-template<class Solver>
-static void parse_DIMACS(gzFile input_stream, Solver& S, bool strictp = false) {
+template<class Solver,class C>
+static void parse_DIMACS(gzFile input_stream, Solver& S,C *cls, bool strictp = false) {
     StreamBuffer in(input_stream);
-    parse_DIMACS_main(in, S, strictp); }
+    parse_DIMACS_main(in, S,cls, strictp); }
 
 //=================================================================================================
 }

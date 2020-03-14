@@ -8,14 +8,15 @@
 #include <vector>
 #include <minisat/core/SolverTypes.h>
 
-inline bool isSub(std::vector<int> &source,Minisat::Clause *clause,int limit){
+template <class T>
+inline bool isSub(T &source,Minisat::Clause &clause,int limit){
     int sourceIndex=0;
     int clauseIndex=0;
-    if (source.size()<clause->size()){
+    if (source.size()<clause.size()){
         return false;
     }
-    while ( sourceIndex<source.size()&&clauseIndex<clause->size()){
-        int atom=Minisat::var((*clause)[clauseIndex]);
+    while ( sourceIndex<source.size()&&clauseIndex<clause.size()){
+        int atom=Minisat::var((clause)[clauseIndex]);
         if(source[sourceIndex]>=limit){
             break;
         }
@@ -30,5 +31,5 @@ inline bool isSub(std::vector<int> &source,Minisat::Clause *clause,int limit){
             return false;
         }
     }
-    return  clauseIndex == clause->size() ;
+    return  clauseIndex == clause.size() ;
 }

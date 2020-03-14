@@ -7,14 +7,14 @@
 
 class BaseSolver {
 public:
-    BaseSolver(const char *path, bool strictp,int verbosity);
+    void readCNF(const char *path, bool strictp,int verbosity);
     virtual bool solve() =0;
     inline int   nVars         ()      const   { return solver.nVars(); }
 
     virtual Minisat::vec<Minisat::lbool>&  getModel()  {
         return solver.model;
     };
-
+    virtual void addClause(Minisat::vec<Minisat::Lit>&lits)=0;
     virtual void printStats() {_printStats();}
 
 protected:
