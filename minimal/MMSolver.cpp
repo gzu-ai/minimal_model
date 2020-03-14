@@ -10,7 +10,8 @@ bool MMSolver::solve() {
         return result;
     }
     compute_model_count=1;
-    while (solver.solve()){
+    solver.simplify();
+    while (solver.solve(false, true)){
         result =true;
         litsT.clear();
         model.clear();
@@ -24,6 +25,7 @@ bool MMSolver::solve() {
             }
         }
         solver.addClause(litsT);
+        solver.simplify();
         ++compute_model_count;
     }
     return result;

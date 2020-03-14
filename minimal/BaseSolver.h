@@ -3,6 +3,7 @@
 #ifndef MINISAT_BASESOLVER_H
 #define MINISAT_BASESOLVER_H
 
+#include <minisat/simp/SimpSolver.h>
 #include "SpaceDefine.h"
 
 namespace Minimal {
@@ -25,7 +26,7 @@ namespace Minimal {
     protected:
         void _printStats();
 
-        SOlVER_NAMESPACE::Solver solver;
+        SOlVER_NAMESPACE::SimpSolver solver;
 
     };
 

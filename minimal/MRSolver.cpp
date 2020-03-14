@@ -1,5 +1,6 @@
 
 
+#include <minisat/simp/SimpSolver.h>
 #include "MRSolver.h"
 
 using namespace Minimal;
@@ -10,7 +11,8 @@ bool MRSolver::solve() {
     }
     compute_model_count=1;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> litsT;
-    while (solver.solve()){
+    solver.simplify();
+    while (solver.solve(false, true)){
         result =true;
         litsT.clear();
         model.clear();
@@ -28,6 +30,7 @@ bool MRSolver::solve() {
         }
         ++compute_model_count;
         solver.addClause(litsT);
+        solver.simplify();
     }
     return result;
 }
@@ -178,7 +181,7 @@ bool MRSolver::compute(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts, SOlVER
         }
         return true;
     }
-    SOlVER_NAMESPACE::Solver solver;
+    SOlVER_NAMESPACE::SimpSolver solver;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
     for (int i = 0; i < this->solver.nVars(); i++) {
         solver.newVar();
@@ -199,6 +202,7 @@ bool MRSolver::compute(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts, SOlVER
         lits.push(~SOlVER_NAMESPACE::mkLit(S[k]));
     }
     solver.addClause(lits);
+    solver.eliminate(true);
     ++compute_mini_model_count;
     return !solver.solve();
 }
