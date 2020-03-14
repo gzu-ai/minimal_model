@@ -18,7 +18,7 @@ namespace Minimal {
 
         inline int nVars() const { return _nVars +1;}
 
-        virtual void addClause(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> &lits){
+         void addClause(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> &lits){
             SOlVER_NAMESPACE::sort(lits);
             SOlVER_NAMESPACE::Lit& lit=  lits.last();
             int value=SOlVER_NAMESPACE::var(lit);
@@ -26,6 +26,11 @@ namespace Minimal {
             SOlVER_NAMESPACE::CRef crf = ca.alloc(lits);
             clauses.push(crf);
          }
+        void addClause(SOlVER_NAMESPACE::Lit lit){
+            SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
+            lits.push(lit);
+            addClause(lits);
+        }
          template <class  Solver>
         void addClauseToSolver(Solver *S){
              for (int k = 0; k < _nVars+1; ++k) {

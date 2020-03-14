@@ -16,8 +16,6 @@ bool MRSolver::solve() {
     solver->eliminate(true);
     while (solver->solve()){
         result =true;
-        SOlVER_NAMESPACE::SimpSolver *temp= new  SOlVER_NAMESPACE::SimpSolver();
-        addClauseToSolver(temp);
         litsT.clear();
         model.clear();
         for (int i = 0; i < solver->nVars(); i++) {
@@ -26,15 +24,16 @@ bool MRSolver::solve() {
             if (value == SOlVER_NAMESPACE::l_True) {
                 litsT.push(~SOlVER_NAMESPACE::mkLit(i));
             } else if(value==SOlVER_NAMESPACE::l_False){
-                temp->addClause(~SOlVER_NAMESPACE::mkLit(i));
+                addClause(~SOlVER_NAMESPACE::mkLit(i));
             }
         }
-        temp->addClause(litsT);
-        delete solver;
-        solver=temp;
         if(this->check()){
             break;
         }
+        addClause(litsT);
+        delete solver;
+        solver= new  SOlVER_NAMESPACE::SimpSolver();;
+        addClauseToSolver(solver);
         ++compute_model_count;
         solver->eliminate(true);
     }

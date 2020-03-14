@@ -16,10 +16,6 @@ namespace Minimal {
 
         void printStats();
 
-        SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::lbool> &getModel() {
-            return model;
-        };
-
 
     private:
         int compute_model_count = 0;

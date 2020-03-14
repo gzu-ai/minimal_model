@@ -40,7 +40,7 @@ int main(int argc, char** argv)
         SOlVER_NAMESPACE::IntOption    cpu_lim("MAIN", "cpu-lim","Limit on CPU time allowed in seconds.\n", 0,SOlVER_NAMESPACE:: IntRange(0, INT32_MAX));
         SOlVER_NAMESPACE:: IntOption    mem_lim("MAIN", "mem-lim","Limit on memory usage in megabytes.\n", 0, SOlVER_NAMESPACE::IntRange(0, INT32_MAX));
         SOlVER_NAMESPACE:: BoolOption   strictp("MAIN", "strict", "Validate DIMACS header during parsing.", false);
-        SOlVER_NAMESPACE::StringOption mod("MAIN","mod","Select a mod to compute mini modal \n        MMSAT,MRSAT","MRSAT");
+        SOlVER_NAMESPACE::StringOption mod("MAIN","mod","Select a mod to compute mini modal \n        MMSAT,MRSAT","MMSAT");
         SOlVER_NAMESPACE::parseOptions(argc, argv, true);
         if (cpu_lim != 0) limitTime(cpu_lim);
         if (mem_lim != 0) limitMemory(mem_lim);

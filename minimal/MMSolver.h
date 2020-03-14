@@ -13,16 +13,9 @@ namespace Minimal {
 
         void printStats();
 
-        SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::lbool> &getModel() {
-            return model;
-        }
-
-        void addClause(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> &lits) {}
-
     private:
         int compute_model_count = 0;
         bool result = false;
-        SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::lbool> model;
     };
 }
 
