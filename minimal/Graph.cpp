@@ -46,10 +46,11 @@ bool Graph::remove(int point) {
             emptyInDegree.insert(it);
         }
     }
+    int degree=indegreeItTo->second;
     emptyInDegree.erase(point);
     indegree.erase(point);
     content.erase(point);
-    if (indegreeItTo->second==0){
+    if (degree==0){
         return true;
     }
     for (auto &  it:content) {

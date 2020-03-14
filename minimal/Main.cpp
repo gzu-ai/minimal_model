@@ -46,6 +46,7 @@ int main(int argc, char** argv)
         if (mem_lim != 0) limitMemory(mem_lim);
         SOlVER_NAMESPACE::sigTerm(SIGINT_exit);
         signal(SIGQUIT,SIGINT_exit);
+        signal(SIGSEGV,SIGINT_exit);
         double initial_time = SOlVER_NAMESPACE::cpuTime();
         if (strcmp(&*mod,"MMSAT")==0){
             solver=new MMSolver();

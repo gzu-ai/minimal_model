@@ -28,7 +28,7 @@ namespace Minimal {
          }
          template <class  Solver>
         void addClauseToSolver(Solver *S){
-             for (int k = 0; k < _nVars; ++k) {
+             for (int k = 0; k < _nVars+1; ++k) {
                  S->newVar();
              }
              SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
