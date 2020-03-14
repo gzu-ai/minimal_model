@@ -2,10 +2,10 @@
 #include "MMSolver.h"
 #include <zlib.h>
 #include <minisat/core/Dimacs.h>
-
+using namespace Minimal;
 
 bool MMSolver::solve() {
-    Minisat::vec<Minisat::Lit> litsT;
+    SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> litsT;
     if(compute_model_count>0){
         return result;
     }
@@ -15,12 +15,12 @@ bool MMSolver::solve() {
         litsT.clear();
         model.clear();
         for (int i = 0; i < solver.nVars(); i++) {
-            Minisat::lbool value=solver.model[i];
+            SOlVER_NAMESPACE::lbool value=solver.model[i];
             model.push(value);
-            if (value == Minisat::l_True) {
-                litsT.push(~Minisat::mkLit(i));
-            } else if(value==Minisat::l_False){
-                solver.addClause(~Minisat::mkLit(i));
+            if (value == SOlVER_NAMESPACE::l_True) {
+                litsT.push(~SOlVER_NAMESPACE::mkLit(i));
+            } else if(value==SOlVER_NAMESPACE::l_False){
+                solver.addClause(~SOlVER_NAMESPACE::mkLit(i));
             }
         }
         solver.addClause(litsT);

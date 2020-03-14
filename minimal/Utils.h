@@ -6,17 +6,17 @@
 #endif //MINISAT_UTILS_H
 
 #include <vector>
-#include <minisat/core/SolverTypes.h>
+#include "SpaceDefine.h"
 
 template <class T>
-inline bool isSub(T &source,Minisat::Clause &clause,int limit){
+inline bool isSub(T &source,SOlVER_NAMESPACE::Clause &clause,int limit){
     int sourceIndex=0;
     int clauseIndex=0;
     if (source.size()<clause.size()){
         return false;
     }
     while ( sourceIndex<source.size()&&clauseIndex<clause.size()){
-        int atom=Minisat::var((clause)[clauseIndex]);
+        int atom=SOlVER_NAMESPACE::var((clause)[clauseIndex]);
         if(source[sourceIndex]>=limit){
             break;
         }

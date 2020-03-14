@@ -53,7 +53,7 @@ target_link_libraries(minisat-lib-static ${ZLIB_LIBRARY})
 
 add_executable(minisat_core minisat/core/Main.cc)
 add_executable(minisat_simp minisat/simp/Main.cc)
-add_executable(minimal minimal/Main.cpp minimal/MMSolver.cpp minimal/MMSolver.h minimal/MRSolver.cpp minimal/MRSolver.h minimal/Graph.cpp minimal/Graph.h minimal/Utils.h minimal/BaseSolver.cpp minimal/BaseSolver.h)
+add_executable(minimal minimal/Main.cpp minimal/MMSolver.cpp minimal/MMSolver.h minimal/MRSolver.cpp minimal/MRSolver.h minimal/Graph.cpp minimal/Graph.h minimal/Utils.h minimal/BaseSolver.cpp minimal/BaseSolver.h minimal/SpaceDefine.h)
 
 if(STATIC_BINARIES)
   target_link_libraries(minisat_core minisat-lib-static)

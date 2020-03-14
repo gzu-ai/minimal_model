@@ -2,6 +2,7 @@
 #include "Graph.h"
 #include <algorithm>
 
+using namespace Minimal;
 void Graph::addPoint(int from, int to) {
     auto it= content.find(from);
     if(it==content.end()){

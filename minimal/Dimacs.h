@@ -23,16 +23,15 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 #include <stdio.h>
 
-#include "minisat/utils/ParseUtils.h"
-#include "minisat/core/SolverTypes.h"
+#include "SpaceDefine.h"
 
-namespace Minisat {
+namespace Minimal {
 
 //=================================================================================================
 // DIMACS Parser:
 
 template<class B, class Solver>
-static void readClause(B& in, Solver& S, vec<Lit>& lits) {
+static void readClause(B& in, Solver& S, SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit>& lits) {
     int     parsed_lit, var;
     lits.clear();
     for (;;){
@@ -40,13 +39,13 @@ static void readClause(B& in, Solver& S, vec<Lit>& lits) {
         if (parsed_lit == 0) break;
         var = abs(parsed_lit)-1;
         while (var >= S.nVars()) S.newVar();
-        lits.push( (parsed_lit > 0) ? mkLit(var) : ~mkLit(var) );
+        lits.push( (parsed_lit > 0) ? SOlVER_NAMESPACE::mkLit(var) : ~SOlVER_NAMESPACE::mkLit(var) );
     }
 }
 
-template<class B, class Solver>
-static void parse_DIMACS_main(B& in, Solver& S, bool strictp = false) {
-    vec<Lit> lits;
+template<class B, class Solver,class C>
+static void parse_DIMACS_main(B& in, Solver& S,C * cls, bool strictp = false) {
+    SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
     int vars    = 0;
     int clauses = 0;
     int cnt     = 0;
@@ -68,6 +67,7 @@ static void parse_DIMACS_main(B& in, Solver& S, bool strictp = false) {
         else{
             cnt++;
             readClause(in, S, lits);
+            cls->addClause(lits);
             S.addClause_(lits); }
     }
     if (strictp && cnt != clauses)
@@ -76,10 +76,10 @@ static void parse_DIMACS_main(B& in, Solver& S, bool strictp = false) {
 
 // Inserts problem into solver.
 //
-template<class Solver>
-static void parse_DIMACS(gzFile input_stream, Solver& S, bool strictp = false) {
-    StreamBuffer in(input_stream);
-    parse_DIMACS_main(in, S, strictp); }
+template<class Solver,class C>
+static void parse_DIMACS(gzFile input_stream, Solver& S,C *cls, bool strictp = false) {
+        SOlVER_NAMESPACE::StreamBuffer in(input_stream);
+    parse_DIMACS_main(in, S,cls, strictp); }
 
 //=================================================================================================
 }
