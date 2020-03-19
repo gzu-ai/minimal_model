@@ -22,6 +22,7 @@ static void SIGINT_exit(int) {
     printf("\n"); printf("*** INTERRUPTED ***\n");
     solver->printStats();
     printf("\n"); printf("*** INTERRUPTED ***\n");
+    fflush(stdout);
     _exit(1);
 }
 
@@ -52,6 +53,8 @@ int main(int argc, char** argv)
         } else{
             solver=new MRSolver();
         }
+        SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> l;
+        solver->addClause(l);
         solver->readCNF(argv[1],strictp,verb);
         bool  result=solver->solve();
         solver->printStats();
@@ -72,6 +75,7 @@ int main(int argc, char** argv)
     } catch (SOlVER_NAMESPACE::OutOfMemoryException&){
         printf("===============================================================================\n");
         printf("INDETERMINATE\n");
+        fflush(stdout);
         exit(0);
     }
 }

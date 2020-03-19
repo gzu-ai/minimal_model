@@ -19,7 +19,7 @@ namespace Minimal {
             return solver.model;
         };
 
-        virtual void addClause(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> &lits) = 0;
+        virtual void addClause(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> &lits) {};
 
         virtual void printStats() { _printStats(); }
 
