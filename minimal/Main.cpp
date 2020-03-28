@@ -22,8 +22,7 @@ static void SIGINT_exit(int) {
     printf("\n"); printf("*** INTERRUPTED ***\n");
     solver->printStats();
     printf("\n"); printf("*** INTERRUPTED ***\n");
-    fflush(stdout);
-    _exit(1);
+    exit(1);
 }
 
 
