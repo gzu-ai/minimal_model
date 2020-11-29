@@ -16,10 +16,12 @@ make install
 
 # Directory Overview:
 
-minisat              minisat code directory
+- minisat:             minisat code directory
 
-minimal            Main code for computing minimal model
+- minimal:            Main code for computing minimal model
 
-README.md
+- README.md
 
-LICENSE
+- LICENSE
+
+- CMakeList.txt
