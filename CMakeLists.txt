@@ -52,41 +52,24 @@ set(MINISAT_LIB_SOURCES
     minisat/core/Solver.cc
     minisat/simp/SimpSolver.cc)
 
-set(
-        MINIMAL_LIB_SOURCES
-        minimal/MMSolver.cpp minimal/MMSolver.h
-        minimal/MRSolver.cpp minimal/MRSolver.h
-        minimal/Graph.cpp minimal/Graph.h
-        minimal/Utils.h
-        minimal/BaseSolver.cpp
-        minimal/BaseSolver.h
-        minimal/SpaceDefine.h
-)
-
 add_library(minisat-lib-static STATIC ${MINISAT_LIB_SOURCES})
-add_library(minisat-lib-shared SHARED ${MINISAT_LIB_SOURCES})
-
-add_library(minimal-lib-static STATIC ${MINIMAL_LIB_SOURCES})
-add_library(minimal-lib-shared SHARED ${MINIMAL_LIB_SOURCES})
+add_library(minisat-lib-shared SHARED ${MINISAT_LIB_SOURCES} minimal/Main.cpp)
 
 target_link_libraries(minisat-lib-shared ${ZLIB_LIBRARY})
 target_link_libraries(minisat-lib-static ${ZLIB_LIBRARY})
 
-target_link_libraries(minimal-lib-shared minisat-lib-shared ${ZLIB_LIBRARY})
-target_link_libraries(minimal-lib-static minisat-lib-static ${ZLIB_LIBRARY})
-
 add_executable(minisat_core minisat/core/Main.cc)
 add_executable(minisat_simp minisat/simp/Main.cc)
-add_executable(minimal minimal/Main.cpp)
+add_executable(minimal minimal/Main.cpp minimal/MMSolver.cpp minimal/MMSolver.h minimal/MRSolver.cpp minimal/MRSolver.h minimal/Graph.cpp minimal/Graph.h minimal/Utils.h minimal/BaseSolver.cpp minimal/BaseSolver.h minimal/SpaceDefine.h)
 
 if(STATIC_BINARIES)
   target_link_libraries(minisat_core minisat-lib-static)
   target_link_libraries(minisat_simp minisat-lib-static)
-  target_link_libraries(minimal minimal-lib-static)
+  target_link_libraries(minimal minisat-lib-static)
 else()
   target_link_libraries(minisat_core minisat-lib-shared)
   target_link_libraries(minisat_simp minisat-lib-shared)
-  target_link_libraries(minimal minimal-lib-shared)
+  target_link_libraries(minimal minisat-lib-shared)
 endif()
 
 set_target_properties(minisat-lib-static PROPERTIES OUTPUT_NAME "minisat")

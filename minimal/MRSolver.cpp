@@ -11,28 +11,26 @@ bool MRSolver::solve() {
     }
     compute_model_count=1;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> litsT;
-    solver->eliminate(true);
-    while (solver->solve()){
+    solver.simplify();
+    while (solver.solve(false, true)){
         result =true;
         litsT.clear();
         model.clear();
-        for (int i = 0; i < solver->nVars(); i++) {
-            SOlVER_NAMESPACE::lbool value =solver->model[i];
+        for (int i = 0; i < solver.nVars(); i++) {
+            SOlVER_NAMESPACE::lbool value =solver.model[i];
             model.push(value);
             if (value == SOlVER_NAMESPACE::l_True) {
                 litsT.push(~SOlVER_NAMESPACE::mkLit(i));
+            } else if (value == SOlVER_NAMESPACE::l_False) {
+                solver.addClause(~SOlVER_NAMESPACE::mkLit(i));
             }
         }
-        this->mr(this->clauses,model);
         if (this->check()){
             break;
         }
-        int  nvar=solver->nVars();
-        delete solver;
-        solver = newSolver(nvar);
-        copyToSolver();
         ++compute_model_count;
-        solver->addClause(litsT);
+        solver.addClause(litsT);
+        solver.simplify();
     }
     return result;
 }
@@ -41,14 +39,15 @@ bool MRSolver::check() {
     ++check_model_count;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::lbool> model;
     int modeSize=0;
-    int limit =solver->nVars();
-    for (int j = 0; j < limit; ++j) {
-        SOlVER_NAMESPACE::lbool& value = solver->model[j];
+    for (int j = 0; j < solver.nVars(); ++j) {
+        SOlVER_NAMESPACE::lbool& value = solver.model[j];
         model.push(value);
         if (value==SOlVER_NAMESPACE::l_True){
             ++modeSize;
         }
     }
+    int limit =solver.nVars();
+    mr(this->clauses,model);
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> clauses;
     copyToClauses(this->clauses,clauses);
     StronglyConnectedGraph graph;
@@ -133,7 +132,7 @@ bool MRSolver::mr(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses,SOlVER_
 
 bool MRSolver::createGraph(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef>& clauses,StronglyConnectedGraph &graph) {
     Graph gr;
-    int base= solver->nVars();
+    int base= solver.nVars();
     for (int i = 0; i < clauses.size(); ++i) {
         int key=base+i;
         SOlVER_NAMESPACE::Clause * clause= ca.lea(clauses[i]);
@@ -184,7 +183,7 @@ bool MRSolver::compute(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts, SOlVER
     }
     SOlVER_NAMESPACE::SimpSolver solver;
     SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> lits;
-    for (int i = 0; i < this->solver->nVars(); i++) {
+    for (int i = 0; i < this->solver.nVars(); i++) {
         solver.newVar();
     }
 
@@ -271,7 +270,7 @@ void MRSolver::reduce(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses, SO
 
 void MRSolver::computeTS(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses, SOlVER_NAMESPACE::vec<int> &source, SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &ts) {
     ts.clear();
-    int  limit=solver->nVars();
+    int  limit=solver.nVars();
     for (int i = 0; i < clauses.size(); ++i) {
         SOlVER_NAMESPACE::CRef  crf=clauses[i];
         if(isSub(source,ca[crf],limit)){
