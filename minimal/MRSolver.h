@@ -20,7 +20,11 @@ namespace Minimal {
             return model;
         };
 
-
+        void addClause(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::Lit> &lits) {
+            SOlVER_NAMESPACE::sort(lits);
+            SOlVER_NAMESPACE::CRef crf = ca.alloc(lits);
+            clauses.push(crf);
+        }
 
     private:
         SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::lbool> model;
@@ -30,6 +34,8 @@ namespace Minimal {
         bool result = false;
 
         bool check();
+
+        SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> clauses;
 
         bool createGraph(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &clauses, StronglyConnectedGraph &graph);
 
@@ -107,7 +113,7 @@ namespace Minimal {
 
         inline bool computeS(std::vector<int> &component, SOlVER_NAMESPACE::vec<int> &S) {
             S.clear();
-            int limit = solver->nVars();
+            int limit = solver.nVars();
             for (auto it: component) {
                 if (it < limit) {
                     S.push(it);
@@ -121,6 +127,7 @@ namespace Minimal {
 
         void copyToClauses(SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &source, SOlVER_NAMESPACE::vec<SOlVER_NAMESPACE::CRef> &dist);
 
+        SOlVER_NAMESPACE::ClauseAllocator ca;
     };
 }
 

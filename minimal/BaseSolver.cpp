@@ -8,16 +8,15 @@
 using namespace Minimal;
 void BaseSolver::readCNF(const char *path, bool strictp, int verbosity) {
     gzFile in = gzopen(path, "rb");
-    solver->verbosity = verbosity;
-    this->verbosity=verbosity;
+    solver.verbosity = verbosity;
     if (in == NULL)
         printf("ERROR! Could not open file: %s\n", path), exit(1);
 
-    if (verbosity > 0) {
+    if (this->solver.verbosity > 0) {
         printf("============================[ Problem Statistics ]=============================\n");
         printf("|                                                                             |\n");
     }
-    parse_DIMACS(in, *(this->solver), this,(bool) strictp);
+    parse_DIMACS(in, this->solver, this,(bool) strictp);
     gzclose(in);
 }
  void BaseSolver::_printStats()
